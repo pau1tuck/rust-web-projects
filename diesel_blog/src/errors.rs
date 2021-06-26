@@ -46,7 +46,7 @@ impl AppError {
     }
 }
 
-impl std::Error for AppError {}
+impl std::error::Error for AppError {}
 
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

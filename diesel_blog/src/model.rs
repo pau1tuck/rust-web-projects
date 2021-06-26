@@ -1,11 +1,5 @@
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::{Serialize};
 use crate::schema::posts;
-use diesel::serialize::{ToSql, Output, IsNull};
-use diesel::pg::Pg;
-use std::io::Write;
-use diesel::{serialize, deserialize};
-use diesel::deserialize::FromSql;
-use diesel::sql_types::Text;
 
 #[derive(Serialize, Debug, Clone, Queryable)]
 pub struct Post {
@@ -15,12 +9,13 @@ pub struct Post {
     pub status: bool,
 }
 
-#[#[derive(Debug, Clone, Insertable)]]
+#[derive(Debug, Clone, Insertable)]
 #[table_name = "posts"]
 pub struct CreatePost {
     pub title: String,
     pub author: String,
-    pub status: bool,
+    pub body: String,
+    pub published: bool,
 }
 /*
 #[#[derive(Serialize, Deserialize, Debug, Copy, Clone, AsExpression, FromSqlRow)]]
