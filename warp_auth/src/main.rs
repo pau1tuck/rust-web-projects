@@ -4,6 +4,8 @@ use serde::Deserialize; // A framework for serializing and deserializing Rust da
 use tokio::sync::Mutex; // Synchronization primitives for use in asynchronous contexts from tokio, an event-driven, non-blocking I/O platform for writing asynchronous applications.
 use warp::Filter;
 use warp::http::StatusCode;
+use argon2::{self, Config};
+use rand::Rng;
 
 #[derive(Deserialize)]
 struct User {
@@ -30,9 +32,8 @@ async fn main() {
         .and(warp::body::json())
         .and(db.clone())
         .and_then(login);
-    let logout = warp::path("logout").map(|| "Log out");
     
-    let routes = register.or(login).or(logout);
+    let routes = register.or(login);
     let routes = warp::path("api").and(routes);
 
     println!("🚀 Warp server running on localhost:{}", port);
@@ -41,7 +42,7 @@ async fn main() {
         .await;
 }
 
-async fn register(
+pub async fn register(
     new_user: User,
     db: Arc<Mutex<HashMap<String, User>>>,
 ) -> Result<impl warp::Reply, warp::Rejection> {
@@ -49,11 +50,15 @@ async fn register(
     if users.contains_key(&new_user.username) {
         return Ok(StatusCode::BAD_REQUEST);
     }
-    users.insert(new_user.username.clone(), new_user);
+    let hashed_user = User {
+        username: new_user.username,
+        password: hash_password(new_user.password.as_bytes()),
+    }
+    users.insert(hashed_user.username.clone(), hashed_user);
     Ok(StatusCode::CREATED)
 }
 
-async fn login(
+pub async fn login(
     credentials: User,
     db: Arc<Mutex<HashMap<String, User>>>,
 ) -> Result<impl warp::Reply, warp::Rejection> {
@@ -61,11 +66,21 @@ async fn login(
     match users.get(&credentials.username) {
         None => Ok(StatusCode::BAD_REQUEST),
         Some(user) => {
-            if credentials.password == user.password {
+            if verify_password(&user.password, credentials.password.as_bytes()) {
                 Ok(StatusCode::OK)
             } else {
                 Ok(StatusCode::UNAUTHORIZED)
             }
         }
     }
+}
+
+pub fn hash_password(password: &[u8]) -> String {
+    let salt = rand::thread_rng().gen::<[u8; 32]>();
+    let config = Config::default();
+    argon2::hash_encoded(password, &salt, &config).unwrap()
+}
+
+pub fn verify_password(hash: &str, password: &[u8]) -> bool {
+    argon2::verify_encoded(hash, password).unwrap_or(false)
 }
