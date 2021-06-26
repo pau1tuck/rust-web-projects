@@ -3,7 +3,7 @@ table! {
         id -> Int8,
         title -> Varchar,
         author -> Varchar,
-        content -> Nullable<Text>,
+        body -> Nullable<Text>,
         published -> Bool,
     }
 }
