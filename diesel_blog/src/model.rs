@@ -6,7 +6,8 @@ pub struct Post {
     pub id: i64,
     pub title: String,
     pub author: String,
-    pub status: bool,
+    pub body: Option<String>,
+    pub published: bool,
 }
 
 #[derive(Debug, Clone, Insertable)]
@@ -14,7 +15,7 @@ pub struct Post {
 pub struct CreatePost {
     pub title: String,
     pub author: String,
-    pub body: String,
+    pub body: Option<String>,
     pub published: bool,
 }
 /*

@@ -14,7 +14,10 @@ impl DBAccessManager {
         DBAccessManager { connection }
     }
 
-    pub fn create_post(&self, dto: CreatePost) -> Result<Post, AppError> {
+    pub fn create_post(
+        &self,
+        dto: CreatePost
+    ) -> Result<Post, AppError> {
         use super::schema::posts;
 
         diesel::insert_into(posts::table)
@@ -35,7 +38,10 @@ impl DBAccessManager {
             })
     }
 
-    pub fn delete_post(&self, post_id: i64) -> Result<usize, AppError> {
+    pub fn delete_post(
+        &self,
+        post_id: i64
+    ) -> Result<usize, AppError> {
         use super::schema::posts::dsl::*;
 
         let deleted = diesel::delete(posts.filter(id.eq(post_id)))
